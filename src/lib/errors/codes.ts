@@ -1,0 +1,59 @@
+// Machine-readable error codes. The AI integration layer (Phase 2) and the
+// dashboard both depend on these being stable — never rename, only add.
+export const ErrorCode = {
+  PATIENT_NOT_FOUND: "PATIENT_NOT_FOUND",
+  PATIENT_ALREADY_EXISTS: "PATIENT_ALREADY_EXISTS",
+  SERVICE_NOT_FOUND: "SERVICE_NOT_FOUND",
+  PRACTITIONER_NOT_FOUND: "PRACTITIONER_NOT_FOUND",
+  APPOINTMENT_NOT_FOUND: "APPOINTMENT_NOT_FOUND",
+  APPOINTMENT_CONFLICT: "APPOINTMENT_CONFLICT",
+  INVALID_APPOINTMENT_TIME: "INVALID_APPOINTMENT_TIME",
+  INSUFFICIENT_STOCK: "INSUFFICIENT_STOCK",
+  INVOICE_NOT_FOUND: "INVOICE_NOT_FOUND",
+  PAYMENT_FAILED: "PAYMENT_FAILED",
+  UNAUTHORIZED: "UNAUTHORIZED",
+  FORBIDDEN: "FORBIDDEN",
+  VALIDATION_ERROR: "VALIDATION_ERROR",
+  NOT_FOUND: "NOT_FOUND",
+  IDEMPOTENCY_KEY_REUSED: "IDEMPOTENCY_KEY_REUSED",
+  IDEMPOTENT_REQUEST_IN_PROGRESS: "IDEMPOTENT_REQUEST_IN_PROGRESS",
+  INTERNAL_ERROR: "INTERNAL_ERROR",
+  RATE_LIMITED: "RATE_LIMITED",
+} as const;
+
+export type ErrorCode = (typeof ErrorCode)[keyof typeof ErrorCode];
+
+const STATUS_BY_CODE: Record<ErrorCode, number> = {
+  PATIENT_NOT_FOUND: 404,
+  PATIENT_ALREADY_EXISTS: 409,
+  SERVICE_NOT_FOUND: 404,
+  PRACTITIONER_NOT_FOUND: 404,
+  APPOINTMENT_NOT_FOUND: 404,
+  APPOINTMENT_CONFLICT: 409,
+  INVALID_APPOINTMENT_TIME: 422,
+  INSUFFICIENT_STOCK: 409,
+  INVOICE_NOT_FOUND: 404,
+  PAYMENT_FAILED: 402,
+  UNAUTHORIZED: 401,
+  FORBIDDEN: 403,
+  VALIDATION_ERROR: 400,
+  NOT_FOUND: 404,
+  IDEMPOTENCY_KEY_REUSED: 409,
+  IDEMPOTENT_REQUEST_IN_PROGRESS: 409,
+  INTERNAL_ERROR: 500,
+  RATE_LIMITED: 429,
+};
+
+export class AppError extends Error {
+  readonly code: ErrorCode;
+  readonly status: number;
+  readonly details?: unknown;
+
+  constructor(code: ErrorCode, message: string, details?: unknown) {
+    super(message);
+    this.name = "AppError";
+    this.code = code;
+    this.status = STATUS_BY_CODE[code];
+    this.details = details;
+  }
+}
