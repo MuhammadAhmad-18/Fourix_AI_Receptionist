@@ -4,6 +4,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import { PageHeader, EmptyRow } from "@/components/page-header";
 import { ActiveBadge } from "@/components/status-badge";
+import { NewServiceButton, ServiceRowActions } from "@/components/services/service-actions";
 
 export default async function ServicesPage() {
   const ctx = await getActorContextFromSession();
@@ -15,6 +16,7 @@ export default async function ServicesPage() {
         eyebrow="Clinic"
         title="Services"
         description="Treatments offered, with duration, price and pre-treatment requirements."
+        action={<NewServiceButton />}
       />
 
       <div className="table-surface">
@@ -26,12 +28,13 @@ export default async function ServicesPage() {
               <TableHead className="text-right">Price (PKR)</TableHead>
               <TableHead>Requires</TableHead>
               <TableHead className="text-right">Status</TableHead>
+              <TableHead className="w-10" aria-label="Actions" />
             </TableRow>
           </TableHeader>
           <TableBody>
             {services.length === 0 ? (
               <EmptyRow
-                colSpan={5}
+                colSpan={6}
                 title="No services configured"
                 hint="Add treatments so they can be booked and invoiced."
               />
@@ -64,6 +67,9 @@ export default async function ServicesPage() {
                   </TableCell>
                   <TableCell className="text-right">
                     <ActiveBadge active={s.active} />
+                  </TableCell>
+                  <TableCell className="text-right">
+                    <ServiceRowActions service={s} />
                   </TableCell>
                 </TableRow>
               ))

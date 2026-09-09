@@ -24,6 +24,25 @@ export const appointmentRepository = {
     });
   },
 
+  /**
+   * Everything starting inside [from, to) for the whole clinic, with the names
+   * the calendar renders. Bounds are UTC instants derived from clinic-local
+   * month edges by the caller.
+   */
+  listForClinicRange(clinicId: string, from: Date, to: Date) {
+    return prisma.appointment.findMany({
+      where: { clinicId, startTime: { gte: from, lt: to } },
+      include: {
+        patient: { select: { id: true, firstName: true, lastName: true } },
+        practitioner: {
+          select: { id: true, employee: { select: { firstName: true, lastName: true } } },
+        },
+        service: { select: { id: true, name: true, durationMinutes: true } },
+      },
+      orderBy: { startTime: "asc" },
+    });
+  },
+
   /** Busy intervals for a practitioner overlapping [from, to), excluding cancelled/no-show. */
   busyIntervals(practitionerId: string, from: Date, to: Date) {
     return prisma.appointment.findMany({

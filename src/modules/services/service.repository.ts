@@ -22,4 +22,23 @@ export const serviceRepository = {
     if (!existing) return null;
     return prisma.service.update({ where: { id }, data });
   },
+
+  /** Everything that would be orphaned by a hard delete. */
+  async countReferences(id: string) {
+    const [appointments, treatments, packages, invoiceItems] = await Promise.all([
+      prisma.appointment.count({ where: { serviceId: id } }),
+      prisma.treatment.count({ where: { serviceId: id } }),
+      prisma.package.count({ where: { serviceId: id } }),
+      prisma.invoiceItem.count({ where: { serviceId: id } }),
+    ]);
+    return { appointments, treatments, packages, invoiceItems };
+  },
+
+  /** Clears the practitioner join rows first — they carry no history of their own. */
+  async delete(id: string) {
+    return prisma.$transaction(async (tx) => {
+      await tx.practitionerService.deleteMany({ where: { serviceId: id } });
+      await tx.service.delete({ where: { id } });
+    });
+  },
 };

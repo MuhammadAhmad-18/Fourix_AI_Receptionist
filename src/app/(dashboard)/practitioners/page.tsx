@@ -4,6 +4,10 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import { PageHeader, EmptyRow } from "@/components/page-header";
 import { ActiveBadge, humanizeEnum } from "@/components/status-badge";
+import {
+  NewPractitionerButton,
+  PractitionerRowActions,
+} from "@/components/practitioners/practitioner-actions";
 
 export default async function PractitionersPage() {
   const ctx = await getActorContextFromSession();
@@ -15,6 +19,7 @@ export default async function PractitionersPage() {
         eyebrow="Clinic"
         title="Practitioners"
         description="The clinical team and the treatments each is qualified to deliver."
+        action={<NewPractitionerButton />}
       />
 
       <div className="table-surface">
@@ -24,12 +29,13 @@ export default async function PractitionersPage() {
               <TableHead>Practitioner</TableHead>
               <TableHead>Specialties</TableHead>
               <TableHead className="text-right">Status</TableHead>
+              <TableHead className="w-10" aria-label="Actions" />
             </TableRow>
           </TableHeader>
           <TableBody>
             {practitioners.length === 0 ? (
               <EmptyRow
-                colSpan={3}
+                colSpan={4}
                 title="No practitioners yet"
                 hint="Add clinical staff before appointments can be assigned."
               />
@@ -65,6 +71,9 @@ export default async function PractitionersPage() {
                   </TableCell>
                   <TableCell className="text-right">
                     <ActiveBadge active={p.active} />
+                  </TableCell>
+                  <TableCell className="text-right">
+                    <PractitionerRowActions practitioner={p} />
                   </TableCell>
                 </TableRow>
               ))

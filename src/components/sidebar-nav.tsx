@@ -6,6 +6,7 @@ import {
   LayoutDashboard,
   Users,
   CalendarDays,
+  CalendarRange,
   Sparkles,
   Stethoscope,
   Boxes,
@@ -29,6 +30,7 @@ export const NAV_GROUPS: { label: string; items: NavItem[] }[] = [
   {
     label: "Clinic",
     items: [
+      { href: "/calendar", label: "Calendar", icon: CalendarRange },
       { href: "/patients", label: "Patients", icon: Users },
       { href: "/appointments", label: "Appointments", icon: CalendarDays },
       { href: "/services", label: "Services", icon: Sparkles },

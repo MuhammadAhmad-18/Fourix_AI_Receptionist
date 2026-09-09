@@ -6,7 +6,7 @@ import { writeAuditLog } from "@/lib/audit";
 import { writeOutboxEvent } from "@/lib/events/outbox";
 import { eventBus } from "@/lib/events/bus";
 import { withIdempotency } from "@/lib/idempotency";
-import { parseStrictIso } from "@/lib/tz";
+import { formatInClinicTz, parseStrictIso } from "@/lib/tz";
 import { clinicRepository } from "@/modules/clinic/clinic.repository";
 import { patientRepository } from "@/modules/patients/patient.repository";
 import { practitionerRepository } from "@/modules/practitioners/practitioner.repository";
@@ -20,6 +20,7 @@ import {
 } from "@/modules/appointments/availability";
 import {
   AppointmentOutput,
+  CalendarAppointment,
   CheckAvailabilityInput,
   CreateAppointmentInput,
   GetAvailableSlotsInput,
@@ -107,6 +108,36 @@ export const appointmentService = {
   async getPatientAppointments(ctx: ActorContext, patientId: string): Promise<AppointmentOutput[]> {
     const appointments = await appointmentRepository.listForPatient(ctx.clinicId, patientId);
     return appointments.map(toAppointmentOutput);
+  },
+
+  /**
+   * Clinic-wide appointments starting inside [from, to), shaped for the month
+   * calendar. Which calendar day an appointment belongs to is decided here, in
+   * the clinic's timezone — a 10pm booking must not drift onto the next day for
+   * a viewer in another zone.
+   */
+  async getAppointmentsInRange(
+    ctx: ActorContext,
+    from: Date,
+    to: Date,
+  ): Promise<CalendarAppointment[]> {
+    const clinic = await clinicRepository.getById(ctx.clinicId);
+    const tz = clinic.timezone;
+    const rows = await appointmentRepository.listForClinicRange(ctx.clinicId, from, to);
+
+    return rows.map((a) => ({
+      id: a.id,
+      patientId: a.patientId,
+      status: a.status,
+      patientName: `${a.patient.firstName} ${a.patient.lastName}`,
+      practitionerName: `${a.practitioner.employee.firstName} ${a.practitioner.employee.lastName}`,
+      serviceName: a.service.name,
+      durationMinutes: a.service.durationMinutes,
+      date: formatInClinicTz(a.startTime, tz, "yyyy-MM-dd"),
+      startLabel: formatInClinicTz(a.startTime, tz, "h:mm a"),
+      endLabel: formatInClinicTz(a.endTime, tz, "h:mm a"),
+      startTime: a.startTime.toISOString(),
+    }));
   },
 
   async createAppointment(ctx: ActorContext, input: CreateAppointmentInput): Promise<AppointmentOutput> {

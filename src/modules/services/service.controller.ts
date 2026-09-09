@@ -24,4 +24,9 @@ export const serviceController = {
     requirePermission(ctx, Permission.SERVICE_MANAGE);
     return toServiceOutput(await serviceCatalogService.updateService(ctx, id, input));
   },
+
+  async remove(ctx: ActorContext, id: string): Promise<{ id: string }> {
+    requirePermission(ctx, Permission.SERVICE_MANAGE);
+    return serviceCatalogService.deleteService(ctx, id);
+  },
 };

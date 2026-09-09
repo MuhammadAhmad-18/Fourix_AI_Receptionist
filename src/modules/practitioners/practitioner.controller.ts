@@ -5,6 +5,7 @@ import {
   CreatePractitionerInput,
   PractitionerOutput,
   ScheduleEntryInput,
+  UpdatePractitionerInput,
   toPractitionerOutput,
 } from "@/modules/practitioners/practitioner.schema";
 
@@ -23,6 +24,20 @@ export const practitionerController = {
   async create(ctx: ActorContext, input: CreatePractitionerInput): Promise<PractitionerOutput> {
     requirePermission(ctx, Permission.PRACTITIONER_MANAGE);
     return toPractitionerOutput(await practitionerService.createPractitioner(ctx, input));
+  },
+
+  async update(
+    ctx: ActorContext,
+    id: string,
+    input: UpdatePractitionerInput,
+  ): Promise<PractitionerOutput> {
+    requirePermission(ctx, Permission.PRACTITIONER_MANAGE);
+    return toPractitionerOutput(await practitionerService.updatePractitioner(ctx, id, input));
+  },
+
+  async remove(ctx: ActorContext, id: string): Promise<{ id: string }> {
+    requirePermission(ctx, Permission.PRACTITIONER_MANAGE);
+    return practitionerService.deletePractitioner(ctx, id);
   },
 
   async setSchedules(ctx: ActorContext, id: string, schedules: ScheduleEntryInput[]) {

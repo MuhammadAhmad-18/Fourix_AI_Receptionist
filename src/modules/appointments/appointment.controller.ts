@@ -3,6 +3,7 @@ import { requirePermission, Permission } from "@/lib/auth/permissions";
 import { appointmentService } from "@/modules/appointments/appointment.service";
 import {
   AppointmentOutput,
+  CalendarAppointment,
   CheckAvailabilityInput,
   CreateAppointmentInput,
   GetAvailableSlotsInput,
@@ -29,6 +30,11 @@ export const appointmentController = {
   async listForPatient(ctx: ActorContext, patientId: string): Promise<AppointmentOutput[]> {
     requirePermission(ctx, Permission.APPOINTMENT_READ);
     return appointmentService.getPatientAppointments(ctx, patientId);
+  },
+
+  async listInRange(ctx: ActorContext, from: Date, to: Date): Promise<CalendarAppointment[]> {
+    requirePermission(ctx, Permission.APPOINTMENT_READ);
+    return appointmentService.getAppointmentsInRange(ctx, from, to);
   },
 
   async create(ctx: ActorContext, input: CreateAppointmentInput): Promise<AppointmentOutput> {

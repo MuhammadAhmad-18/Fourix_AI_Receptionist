@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { Suspense, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -47,12 +47,17 @@ function FieldStatus({
   return null;
 }
 
-export default function NewAppointmentPage() {
+const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/;
+
+function NewAppointmentForm() {
   const router = useRouter();
+  // Arriving from a calendar cell pre-fills the date the user clicked.
+  const presetDate = useSearchParams().get("date");
+
   const [patientId, setPatientId] = useState("");
   const [practitionerId, setPractitionerId] = useState("");
   const [serviceId, setServiceId] = useState("");
-  const [date, setDate] = useState("");
+  const [date, setDate] = useState(presetDate && ISO_DATE.test(presetDate) ? presetDate : "");
   const [time, setTime] = useState("");
 
   const patients = useQuery({
@@ -184,5 +189,14 @@ export default function NewAppointmentPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+/** useSearchParams needs a Suspense boundary above it. */
+export default function NewAppointmentPage() {
+  return (
+    <Suspense>
+      <NewAppointmentForm />
+    </Suspense>
   );
 }

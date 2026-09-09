@@ -19,3 +19,9 @@ export const PATCH = withApiHandler(async (req: NextRequest, ctx: { params: Prom
   const input = updateServiceSchema.parse(await req.json());
   return ok(await serviceController.update(actor, id, input));
 });
+
+export const DELETE = withApiHandler(async (req: NextRequest, ctx: { params: Promise<{ id: string }> }) => {
+  const actor = await getActorContextFromRequest(req);
+  const { id } = await ctx.params;
+  return ok(await serviceController.remove(actor, id));
+});

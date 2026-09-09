@@ -54,6 +54,29 @@ export const appointmentOutputSchema = z.object({
 });
 export type AppointmentOutput = z.infer<typeof appointmentOutputSchema>;
 
+/**
+ * What the month calendar renders for one appointment: names already resolved
+ * and times already rendered in clinic-local time. Doing the timezone work in
+ * the service (not the component) keeps a single source of truth for "what day
+ * is this appointment on" — the clinic's timezone, never the viewer's.
+ */
+export interface CalendarAppointment {
+  id: string;
+  patientId: string;
+  status: AppointmentStatus;
+  patientName: string;
+  practitionerName: string;
+  serviceName: string;
+  durationMinutes: number;
+  /** Clinic-local calendar date, YYYY-MM-DD — the key the grid groups by. */
+  date: string;
+  /** Clinic-local labels, e.g. "10:00 AM". */
+  startLabel: string;
+  endLabel: string;
+  /** UTC ISO instant, for ordering and links. */
+  startTime: string;
+}
+
 export function toAppointmentOutput(a: Appointment): AppointmentOutput {
   return {
     id: a.id,

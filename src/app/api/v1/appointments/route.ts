@@ -3,13 +3,23 @@ import { withApiHandler, ok, created } from "@/lib/api/envelope";
 import { getActorContextFromRequest } from "@/lib/auth/actor-context";
 import { appointmentController } from "@/modules/appointments/appointment.controller";
 import { createAppointmentSchema } from "@/modules/appointments/appointment.schema";
+import { parseStrictIso } from "@/lib/tz";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 export const GET = withApiHandler(async (req: NextRequest) => {
   const ctx = await getActorContextFromRequest(req);
-  const patientId = req.nextUrl.searchParams.get("patientId");
+  const params = req.nextUrl.searchParams;
+
+  // Range query powers the calendar; patientId keeps the original behaviour.
+  const from = params.get("from");
+  const to = params.get("to");
+  if (from && to) {
+    return ok(await appointmentController.listInRange(ctx, parseStrictIso(from), parseStrictIso(to)));
+  }
+
+  const patientId = params.get("patientId");
   if (!patientId) {
     return ok([]);
   }

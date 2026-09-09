@@ -13,6 +13,11 @@ export const createPractitionerSchema = z.object({
 });
 export type CreatePractitionerInput = z.infer<typeof createPractitionerSchema>;
 
+export const updatePractitionerSchema = createPractitionerSchema
+  .partial()
+  .extend({ active: z.boolean().optional() });
+export type UpdatePractitionerInput = z.infer<typeof updatePractitionerSchema>;
+
 export const scheduleEntrySchema = z.object({
   dayOfWeek: z.number().int().min(0).max(6),
   startTime: z.string().regex(/^\d{2}:\d{2}$/),
